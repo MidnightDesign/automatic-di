@@ -1,0 +1,23 @@
+{
+    "name": "midnight/automatic-di",
+    "license": "MIT",
+    "require": {
+        "php": "^7.0",
+        "beberlei/assert": "^2.6",
+        "container-interop/container-interop": "^1.1",
+        "zendframework/zend-servicemanager": "^2.6 || ^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Midnight\\AutomaticDi\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MidnightTest\\Unit\\AutomaticDi\\": "tests/unit"
+        }
+    }
+}
