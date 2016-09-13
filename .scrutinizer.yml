@@ -7,5 +7,3 @@ build:
   environment:
     php:
       version: "7.0"
-    mongodb:
-      true
