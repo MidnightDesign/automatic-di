@@ -2,7 +2,7 @@
 
 namespace Midnight\AutomaticDi;
 
-use Assert\Assertion;
+use InvalidArgumentException;
 
 class AutomaticDiConfig
 {
@@ -17,11 +17,19 @@ class AutomaticDiConfig
         $this->classPreferences = $classPreferences;
     }
 
-    public static function fromConfig(array $config):AutomaticDiConfig
+    public static function fromArray(array $config):AutomaticDiConfig
     {
-        Assertion::isArray($config['preferences']);
-        Assertion::isArray($config['classes']);
+        self::checkConfigArray($config);
         return new self($config['preferences'], $config['classes']);
+    }
+
+    private static function checkConfigArray(array $config)
+    {
+        foreach (['preferences', 'classes'] as $key) {
+            if (!array_key_exists($key, $config) || !is_array($config[$key])) {
+                throw new InvalidArgumentException(sprintf('Missing or invalid config key "%s".', $key));
+            }
+        }
     }
 
     public function getPreferences():array

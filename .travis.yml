@@ -1,0 +1,15 @@
+language: php
+php:
+  - '7.0'
+  - hhvm
+  - nightly
+matrix:
+  allow_failures:
+    - php: hhvm
+    - php: nightly
+before_script:
+  - composer install
+script: ./vendor/bin/phpunit --coverage-clover=coverage.clover
+after_script:
+  - wget https://scrutinizer-ci.com/ocular.phar
+  - php ocular.phar code-coverage:upload --format=php-clover coverage.clover

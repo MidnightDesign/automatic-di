@@ -4,10 +4,9 @@ namespace MidnightTest\Unit\AutomaticDi;
 
 use Midnight\AutomaticDi\AutomaticDiConfig;
 use Midnight\AutomaticDi\AutomaticDiContainer;
+use MidnightTest\Unit\AutomaticDi\TestDouble\MemoryContainer;
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
-use Zend\ServiceManager\Config;
-use Zend\ServiceManager\ServiceManager;
 
 /**
  * Class AutomaticDiContainerTest
@@ -16,8 +15,8 @@ use Zend\ServiceManager\ServiceManager;
  */
 class AutomaticDiContainerTest extends PHPUnit_Framework_TestCase
 {
-    /** @var ServiceManager */
-    private $serviceManager;
+    /** @var MemoryContainer */
+    private $externalContainer;
     /** @var AutomaticDiConfig|PHPUnit_Framework_MockObject_MockObject */
     private $config;
     /** @var AutomaticDiContainer */
@@ -25,14 +24,14 @@ class AutomaticDiContainerTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->serviceManager = new ServiceManager(new Config([]));
+        $this->externalContainer = new MemoryContainer;
         $this->config = $this->getMockBuilder(AutomaticDiConfig::class)->disableOriginalConstructor()->getMock();
-        $this->container = new AutomaticDiContainer($this->serviceManager, $this->config);
+        $this->container = new AutomaticDiContainer($this->externalContainer, $this->config);
     }
 
     public function testGetSimple()
     {
-        $this->configureServiceManager([
+        $this->configureExternalContainer([
             Foo::class => new Foo,
         ]);
 
@@ -49,7 +48,7 @@ class AutomaticDiContainerTest extends PHPUnit_Framework_TestCase
                 FooInterface::class => Foo::class,
             ],
         ]);
-        $this->configureServiceManager([
+        $this->configureExternalContainer([
             Foo::class => new Foo,
         ]);
 
@@ -98,7 +97,7 @@ class AutomaticDiContainerTest extends PHPUnit_Framework_TestCase
                 ],
             ],
         ]);
-        $this->configureServiceManager([
+        $this->configureExternalContainer([
             Foo::class => new Foo,
         ]);
 
@@ -115,7 +114,7 @@ class AutomaticDiContainerTest extends PHPUnit_Framework_TestCase
                 FooInterface::class => Foo::class,
             ],
         ]);
-        $this->configureServiceManager([
+        $this->configureExternalContainer([
             Foo::class => new Foo,
         ]);
 
@@ -143,7 +142,7 @@ class AutomaticDiContainerTest extends PHPUnit_Framework_TestCase
                 ],
             ],
         ]);
-        $this->configureServiceManager([
+        $this->configureExternalContainer([
             Foo::class => new Foo,
         ]);
 
@@ -169,7 +168,7 @@ class AutomaticDiContainerTest extends PHPUnit_Framework_TestCase
                 ],
             ],
         ]);
-        $this->configureServiceManager([
+        $this->configureExternalContainer([
             Foo::class => new Foo,
         ]);
 
@@ -189,19 +188,11 @@ class AutomaticDiContainerTest extends PHPUnit_Framework_TestCase
         $this->assertSame(23, $object->value);
     }
 
-    /**
-     * @param array $config
-     */
-    private function configureServiceManager(array $config)
+    private function configureExternalContainer(array $config)
     {
-        foreach ($config as $name => $service) {
-            $this->serviceManager->setService($name, $service);
-        }
+        $this->externalContainer->setServices($config);
     }
 
-    /**
-     * @param array $config
-     */
     private function configureContainer(array $config)
     {
         $classPreferences = isset($config['classes']) ? $config['classes'] : [];
