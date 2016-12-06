@@ -1,20 +1,19 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace MidnightTest\Unit\AutomaticDi;
 
 use Midnight\AutomaticDi\AutomaticDiConfig;
 use Midnight\AutomaticDi\AutomaticDiContainer;
+use Midnight\AutomaticDi\Cache\CacheInterface;
+use Midnight\AutomaticDi\Cache\MemoryCache;
 use MidnightTest\Unit\AutomaticDi\TestDouble\MemoryContainer;
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 
-/**
- * Class AutomaticDiContainerTest
- *
- * @package MidnightTest\Unit\AutomaticDi
- */
 class AutomaticDiContainerTest extends PHPUnit_Framework_TestCase
 {
+    /** @var CacheInterface */
+    private $cache;
     /** @var MemoryContainer */
     private $externalContainer;
     /** @var AutomaticDiConfig|PHPUnit_Framework_MockObject_MockObject */
@@ -26,7 +25,8 @@ class AutomaticDiContainerTest extends PHPUnit_Framework_TestCase
     {
         $this->externalContainer = new MemoryContainer;
         $this->config = $this->getMockBuilder(AutomaticDiConfig::class)->disableOriginalConstructor()->getMock();
-        $this->container = new AutomaticDiContainer($this->externalContainer, $this->config);
+        $this->cache = new MemoryCache;
+        $this->container = new AutomaticDiContainer($this->externalContainer, $this->config, $this->cache);
     }
 
     public function testGetSimple()
@@ -186,6 +186,23 @@ class AutomaticDiContainerTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf(HasDefaultValue::class, $object);
         /** @var HasDefaultValue $object */
         $this->assertSame(23, $object->value);
+    }
+
+    public function testGetFromCache()
+    {
+        $this->configureContainer([
+            'preferences' => [
+                FooInterface::class => Foo::class,
+            ],
+        ]);
+        $this->configureExternalContainer([
+            Foo::class => new Foo,
+        ]);
+        $this->container->get(Baz::class);
+
+        $bar = $this->container->get(Baz::class);
+
+        $this->assertInstanceOf(Baz::class, $bar);
     }
 
     private function configureExternalContainer(array $config)
