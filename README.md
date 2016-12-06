@@ -59,3 +59,8 @@ $container = new Midnight\AutomaticDi\AutomaticDiContainer($wrappedContainer, $c
 $foo = $container->get(FooInterface::class); // Returns an instance of Foo
 $hodor = $container->get(Hodor::class); // Returns an instance of Hodor with an injected Baz
 ```
+
+## Performance
+> This package works via reflection. Isn't that slow?
+
+Yes, it is. A cache is coming soon.
