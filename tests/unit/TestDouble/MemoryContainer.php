@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace MidnightTest\Unit\AutomaticDi\TestDouble;
 
@@ -17,7 +17,7 @@ class MemoryContainer implements ContainerInterface
     public function get($id)
     {
         if (!$this->has($id)) {
-            throw \MidnightTest\Unit\AutomaticDi\TestDouble\NotFoundException::fromId($id);
+            throw NotFoundException::fromId($id);
         }
         return $this->services[$id];
     }

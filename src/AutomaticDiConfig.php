@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Midnight\AutomaticDi;
 
@@ -17,7 +17,7 @@ class AutomaticDiConfig
         $this->classPreferences = $classPreferences;
     }
 
-    public static function fromArray(array $config):AutomaticDiConfig
+    public static function fromArray(array $config): AutomaticDiConfig
     {
         self::checkConfigArray($config);
         return new self($config['preferences'], $config['classes']);
@@ -32,12 +32,12 @@ class AutomaticDiConfig
         }
     }
 
-    public function getPreferences():array
+    public function getPreferences(): array
     {
         return $this->preferences;
     }
 
-    public function getClassPreferences():array
+    public function getClassPreferences(): array
     {
         return $this->classPreferences;
     }
