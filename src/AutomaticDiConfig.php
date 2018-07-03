@@ -17,7 +17,10 @@ class AutomaticDiConfig
         $this->classPreferences = $classPreferences;
     }
 
-    public static function fromArray(array $config):AutomaticDiConfig
+    /**
+     * @return AutomaticDiConfig
+     */
+    public static function fromArray(array $config)
     {
         self::checkConfigArray($config);
         return new self($config['preferences'], $config['classes']);
@@ -32,12 +35,18 @@ class AutomaticDiConfig
         }
     }
 
-    public function getPreferences():array
+    /**
+     * @return array
+     */
+    public function getPreferences()
     {
         return $this->preferences;
     }
 
-    public function getClassPreferences():array
+    /**
+     * @return array
+     */
+    public function getClassPreferences()
     {
         return $this->classPreferences;
     }

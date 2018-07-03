@@ -41,7 +41,10 @@ class AutomaticDiContainer implements ContainerInterface
         return false;
     }
 
-    private function createConstructorArgs(ReflectionClass $reflectionClass):array
+    /**
+     * @return array
+     */
+    private function createConstructorArgs(ReflectionClass $reflectionClass)
     {
         $constructor = $reflectionClass->getConstructor();
         if ($constructor === null) {
@@ -89,7 +92,11 @@ class AutomaticDiContainer implements ContainerInterface
         return $this->getPreference($className);
     }
 
-    private function getPreference(string $className):string
+    /**
+     * @param string $className
+     * @return string
+     */
+    private function getPreference($className)
     {
         $preferences = $this->getPreferences();
         if (isset($preferences[$className])) {
@@ -98,12 +105,19 @@ class AutomaticDiContainer implements ContainerInterface
         return $className;
     }
 
-    private function getPreferences():array
+    /**
+     * @return array
+     */
+    private function getPreferences()
     {
         return $this->config->getPreferences();
     }
 
-    private function hasPreference(string $id):bool
+    /**
+     * @param string $id
+     * @return bool
+     */
+    private function hasPreference($id)
     {
         return isset($this->getPreferences()[$id]);
     }

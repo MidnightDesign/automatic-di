@@ -48,7 +48,7 @@ class AutomaticDiConfigTest extends PHPUnit_Framework_TestCase
      */
     public function testInvalidConfig(array $config)
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->setExpectedException(InvalidArgumentException::class);
         AutomaticDiConfig::fromArray($config);
     }
 }
