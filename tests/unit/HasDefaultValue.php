@@ -1,13 +1,14 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace MidnightTest\Unit\AutomaticDi;
 
 class HasDefaultValue
 {
-    /** @var int */
-    public $value;
+    public int $value;
 
-    public function __construct($value = 23)
+    public function __construct(int $value = 23)
     {
         $this->value = $value;
     }

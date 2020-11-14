@@ -1,28 +1,44 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MidnightTest\Unit\AutomaticDi\TestDouble;
 
 use Interop\Container\ContainerInterface;
 
+use function array_key_exists;
+
 class MemoryContainer implements ContainerInterface
 {
-    /** @var array */
-    private $services = [];
+    /** @var array<string, mixed> */
+    private array $services = [];
 
-    public function setServices(array $services)
+    /**
+     * @param array<string, mixed> $services
+     */
+    public function setServices(array $services): void
     {
         $this->services = $services;
     }
 
+    /**
+     * @param string $id
+     * @return mixed|object
+     * @phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     */
     public function get($id)
     {
         if (!$this->has($id)) {
-            throw \MidnightTest\Unit\AutomaticDi\TestDouble\NotFoundException::fromId($id);
+            throw NotFoundException::fromId($id);
         }
         return $this->services[$id];
     }
 
-    public function has($id)
+    /**
+     * @param string $id
+     * @phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     */
+    public function has($id): bool
     {
         return array_key_exists($id, $this->services);
     }

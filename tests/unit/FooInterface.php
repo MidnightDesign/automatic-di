@@ -1,12 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MidnightTest\Unit\AutomaticDi;
 
-/**
- * Interface FooInterface
- *
- * @package MidnightTest\Unit\AutomaticDi
- */
 interface FooInterface
 {
 
