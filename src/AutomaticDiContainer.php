@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Midnight\AutomaticDi;
 
-use Interop\Container\ContainerInterface;
 use LogicException;
+use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionParameter;
 
@@ -25,11 +25,9 @@ class AutomaticDiContainer implements ContainerInterface
     }
 
     /**
-     * @param string $id
-     * @return mixed|object
-     * @phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     * @return mixed
      */
-    public function get($id)
+    public function get(string $id)
     {
         if (interface_exists($id)) {
             return $this->container->get($this->getPreferences()[$id]);
@@ -40,11 +38,7 @@ class AutomaticDiContainer implements ContainerInterface
         return $reflectionClass->newInstanceArgs($this->createConstructorArgs($reflectionClass));
     }
 
-    /**
-     * @param string $id
-     * @phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     */
-    public function has($id): bool
+    public function has(string $id): bool
     {
         if (class_exists($id)) {
             return true;
@@ -53,7 +47,7 @@ class AutomaticDiContainer implements ContainerInterface
     }
 
     /**
-     * @return array<int, mixed>
+     * @return list<mixed>
      */
     private function createConstructorArgs(ReflectionClass $reflectionClass): array
     {
@@ -116,7 +110,7 @@ class AutomaticDiContainer implements ContainerInterface
     }
 
     /**
-     * @return array<string, string>
+     * @return array<class-string, class-string>
      */
     private function getPreferences(): array
     {

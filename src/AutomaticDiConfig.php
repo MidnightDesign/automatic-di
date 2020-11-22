@@ -53,7 +53,7 @@ class AutomaticDiConfig
     }
 
     /**
-     * @return array<string, string>
+     * @return array<class-string, class-string>
      */
     public function getPreferences(): array
     {

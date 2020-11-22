@@ -40,7 +40,7 @@ class AutomaticDiConfigTest extends TestCase
     }
 
     /**
-     * @return array<array<array<string, mixed>>>
+     * @return list<array{array<string, mixed>}>
      */
     public function invalidConfigData(): array
     {

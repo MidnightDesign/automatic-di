@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MidnightTest\Unit\AutomaticDi\TestDouble;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 
 use function array_key_exists;
 
@@ -22,11 +22,9 @@ class MemoryContainer implements ContainerInterface
     }
 
     /**
-     * @param string $id
-     * @return mixed|object
-     * @phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     * @return mixed
      */
-    public function get($id)
+    public function get(string $id)
     {
         if (!$this->has($id)) {
             throw NotFoundException::fromId($id);
@@ -34,11 +32,7 @@ class MemoryContainer implements ContainerInterface
         return $this->services[$id];
     }
 
-    /**
-     * @param string $id
-     * @phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     */
-    public function has($id): bool
+    public function has(string $id): bool
     {
         return array_key_exists($id, $this->services);
     }
