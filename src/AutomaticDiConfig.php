@@ -12,14 +12,14 @@ use function sprintf;
 
 class AutomaticDiConfig
 {
-    /** @var array<string, string> */
+    /** @var array<class-string, class-string> */
     private array $preferences;
-    /** @var array<string, array<string, string>> */
+    /** @var array<class-string, array<string, class-string>> */
     private array $classPreferences;
 
     /**
-     * @param array<string, string> $preferences
-     * @param array<string, array<string, string>> $classPreferences
+     * @param array<class-string, class-string> $preferences
+     * @param array<class-string, array<string, class-string>> $classPreferences
      */
     private function __construct(array $preferences, array $classPreferences)
     {
@@ -28,7 +28,10 @@ class AutomaticDiConfig
     }
 
     /**
-     * @param array{preferences: array<string, string>, classes: array<string, array<string, string>>} $config
+     * @param array{
+     *      preferences: array<class-string, class-string>,
+     *      classes: array<class-string, array<string, class-string>>
+     * } $config
      */
     public static function fromArray(array $config): AutomaticDiConfig
     {
@@ -37,7 +40,7 @@ class AutomaticDiConfig
     }
 
     /**
-     * @param array<string, array<string, array<string, string>|string>> $config
+     * @param array<string, array<class-string, array<string, class-string>|class-string>> $config
      */
     private static function checkConfigArray(array $config): void
     {
