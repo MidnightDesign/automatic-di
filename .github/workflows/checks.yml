@@ -24,6 +24,7 @@ jobs:
         run: |
           mkdir -p /root/.ssh
           ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts
+          echo "COMPOSER_CACHE=$(composer config cache-dir)" >> $GITHUB_ENV
 
       - name: Ignore Plaform Reqs if on PHP8
         if: ${{ matrix.php == '8.0' }}
@@ -34,10 +35,10 @@ jobs:
       - name: Composer Cache
         uses: actions/cache@v2
         with:
-          path: $(composer config cache-files-dir)
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
+          path: |
+            ${{ env.COMPOSER_CACHE }}
+            vendor
+          key: ${{ runner.os }}-composer
 
       - name: Install dependencies
         run: |
