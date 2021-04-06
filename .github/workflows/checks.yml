@@ -1,6 +1,6 @@
 name: Check Build
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   build:
@@ -10,6 +10,7 @@ jobs:
         include:
           - php: "7.4"
             phpstan_config: "-c phpstan-php7.neon"
+            require_checker_config: "--config-file=composer-require-checker-php7.json"
           - php: "8.0"
 
     runs-on: ubuntu-latest
@@ -18,6 +19,7 @@ jobs:
 
     env:
       PHPSTAN_CONFIG: ${{ matrix.phpstan_config }}
+      REQUIRE_CHECKER_CONFIG: ${{ matrix.require_checker_config }}
 
     steps:
       - name: Checkout
@@ -44,7 +46,7 @@ jobs:
 
       - name: Static analysis
         run: |
-          composer check-deps
+          composer check-deps -- ${{ env.REQUIRE_CHECKER_CONFIG }}
           composer cs-check
           composer phpstan -- --no-progress ${{ env.PHPSTAN_CONFIG }}
 
