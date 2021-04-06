@@ -4,13 +4,13 @@
     "description": "automatic dependency injection for PHP",
     "license": "MIT",
     "require": {
-        "php": "^7.4",
+        "php": "^7.4 || ^8.0",
         "psr/container": "^1.1 || ^2.0"
     },
     "require-dev": {
         "eventjet/coding-standard": "^3.2",
         "infection/infection": "^0.21.4",
-        "maglnet/composer-require-checker": "^2.1",
+        "maglnet/composer-require-checker": "^3.2",
         "phpstan/extension-installer": "^1.0",
         "phpstan/phpstan": "^0.12.32",
         "phpstan/phpstan-phpunit": "^0.12.16",

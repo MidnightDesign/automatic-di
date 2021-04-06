@@ -7,14 +7,17 @@ jobs:
 
     strategy:
       matrix:
-        php: ["7.4"]
+        include:
+          - php: "7.4"
+            phpstan_config: "-c phpstan-php7.neon"
+          - php: "8.0"
 
     runs-on: ubuntu-latest
     container:
       image: eventjet/checks-${{ matrix.php }}:latest
 
     env:
-      COMPOSER_ARGS: ''
+      PHPSTAN_CONFIG: ${{ matrix.phpstan_config }}
 
     steps:
       - name: Checkout
@@ -24,13 +27,8 @@ jobs:
         run: |
           mkdir -p /root/.ssh
           ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts
-          echo "COMPOSER_CACHE=$(composer config cache-dir)" >> $GITHUB_ENV
-
-      - name: Ignore Plaform Reqs if on PHP8
-        if: ${{ matrix.php == '8.0' }}
-        run: |
-          echo "COMPOSER_ARGS=--ignore-platform-reqs" >> $GITHUB_ENV
           composer self-update --2
+          echo "COMPOSER_CACHE=$(composer config cache-dir)" >> $GITHUB_ENV
 
       - name: Composer Cache
         uses: actions/cache@v2
@@ -42,13 +40,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer install --no-progress --no-suggest --no-interaction ${{ env.COMPOSER_ARGS }} > /dev/null
+          composer install --no-progress --no-suggest --no-interaction > /dev/null
 
       - name: Static analysis
         run: |
           composer check-deps
           composer cs-check
-          composer phpstan -- --no-progress
+          composer phpstan -- --no-progress ${{ env.PHPSTAN_CONFIG }}
 
       - name: Tests
         run: |
@@ -61,5 +59,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           clover_file: "coverage.xml"
-          threshold_alert: 100
+          threshold_alert: 94
           threshold_warning: 100

@@ -1,0 +1,11 @@
+parameters:
+    level: max
+    paths:
+        - src/
+        - tests/
+    checkGenericClassInNonGenericObjectType: false
+#    loading these files in PHP7 causes ParseErrors
+    excludePaths:
+        - tests/unit/AutomaticDiContainerTest.php
+        - tests/unit/RequiresUnionType.php
+        - tests/unit/UnionTypeWithDefaultValue.php
