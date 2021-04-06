@@ -11,6 +11,7 @@ jobs:
           - php: "7.4"
             phpstan_config: "-c phpstan-php7.neon"
             require_checker_config: "--config-file=composer-require-checker-php7.json"
+            infection_score: "--min-msi=92 --min-covered-msi=96"
           - php: "8.0"
 
     runs-on: ubuntu-latest
@@ -52,8 +53,8 @@ jobs:
 
       - name: Tests
         run: |
-          vendor/bin/phpunit --coverage-clover=coverage.xml --stop-on-failure || true
-          composer run --timeout=0 infection || true
+          vendor/bin/phpunit --coverage-clover=coverage.xml --stop-on-failure
+          composer run --timeout=0 infection -- ${{ matrix.infection_score }}
 
       - name: Monitor coverage
         if: github.event_name == 'pull_request'
