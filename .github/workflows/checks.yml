@@ -1,0 +1,65 @@
+name: Check Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    strategy:
+      matrix:
+        php: ["7.4"]
+
+    runs-on: ubuntu-latest
+    container:
+      image: eventjet/checks-${{ matrix.php }}:latest
+
+    env:
+      COMPOSER_ARGS: ''
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Prepare environment
+        run: |
+          mkdir -p /root/.ssh
+          ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts
+          echo "COMPOSER_CACHE=$(composer config cache-dir)" >> $GITHUB_ENV
+
+      - name: Ignore Plaform Reqs if on PHP8
+        if: ${{ matrix.php == '8.0' }}
+        run: |
+          echo "COMPOSER_ARGS=--ignore-platform-reqs" >> $GITHUB_ENV
+          composer self-update --2
+
+      - name: Composer Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ env.COMPOSER_CACHE }}
+            vendor
+          key: ${{ runner.os }}-composer
+
+      - name: Install dependencies
+        run: |
+          composer install --no-progress --no-suggest --no-interaction ${{ env.COMPOSER_ARGS }} > /dev/null
+
+      - name: Static analysis
+        run: |
+          composer check-deps
+          composer cs-check
+          composer phpstan -- --no-progress
+
+      - name: Tests
+        run: |
+          vendor/bin/phpunit --coverage-clover=coverage.xml --stop-on-failure || true
+          composer run --timeout=0 infection || true
+
+      - name: Monitor coverage
+        if: github.event_name == 'pull_request'
+        uses: slavcodev/coverage-monitor-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          clover_file: "coverage.xml"
+          threshold_alert: 100
+          threshold_warning: 100

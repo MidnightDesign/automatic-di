@@ -1,18 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Midnight\AutomaticDi;
 
-use Interop\Container\ContainerInterface;
 use LogicException;
+use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionParameter;
 
+use function class_exists;
+use function interface_exists;
+use function sprintf;
+
 class AutomaticDiContainer implements ContainerInterface
 {
-    /** @var ContainerInterface */
-    private $container;
-    /** @var AutomaticDiConfig */
-    private $config;
+    private ContainerInterface $container;
+    private AutomaticDiConfig $config;
 
     public function __construct(ContainerInterface $container, AutomaticDiConfig $config)
     {
@@ -20,28 +24,32 @@ class AutomaticDiContainer implements ContainerInterface
         $this->config = $config;
     }
 
-    public function get($id)
+    /**
+     * @return mixed
+     */
+    public function get(string $id)
     {
         if (interface_exists($id)) {
             return $this->container->get($this->getPreferences()[$id]);
         }
+        // @phpstan-ignore-next-line
         $reflectionClass = new ReflectionClass($id);
 
         return $reflectionClass->newInstanceArgs($this->createConstructorArgs($reflectionClass));
     }
 
-    public function has($id)
+    public function has(string $id): bool
     {
         if (class_exists($id)) {
             return true;
         }
-        if (interface_exists($id) && $this->hasPreference($id)) {
-            return true;
-        }
-        return false;
+        return interface_exists($id) && $this->hasPreference($id);
     }
 
-    private function createConstructorArgs(ReflectionClass $reflectionClass):array
+    /**
+     * @return list<mixed>
+     */
+    private function createConstructorArgs(ReflectionClass $reflectionClass): array
     {
         $constructor = $reflectionClass->getConstructor();
         if ($constructor === null) {
@@ -62,16 +70,16 @@ class AutomaticDiContainer implements ContainerInterface
         return $args;
     }
 
+    /**
+     * @return mixed
+     */
     private function createArgument(ReflectionParameter $parameter, ReflectionClass $class)
     {
         $serviceName = $this->serviceName($parameter, $class);
         return $this->container->get($serviceName);
     }
 
-    /**
-     * @return string|null
-     */
-    private function serviceName(ReflectionParameter $parameter, ReflectionClass $class)
+    private function serviceName(ReflectionParameter $parameter, ReflectionClass $class): string
     {
         $classPreferences = $this->config->getClassPreferences();
         if (isset($classPreferences[$class->getName()][$parameter->name])) {
@@ -79,17 +87,20 @@ class AutomaticDiContainer implements ContainerInterface
         }
         $class = $parameter->getClass();
         if ($class === null) {
-            throw new LogicException(sprintf(
-                'Missing preference for constructor parameter %s of %s.',
-                $parameter->name,
-                $parameter->getDeclaringClass()->name
-            ));
+            $declaringClass = $parameter->getDeclaringClass() !== null ? $parameter->getDeclaringClass()->name : '?';
+            throw new LogicException(
+                sprintf(
+                    'Missing preference for constructor parameter %s of %s.',
+                    $parameter->name,
+                    $declaringClass
+                )
+            );
         }
         $className = $class->name;
         return $this->getPreference($className);
     }
 
-    private function getPreference(string $className):string
+    private function getPreference(string $className): string
     {
         $preferences = $this->getPreferences();
         if (isset($preferences[$className])) {
@@ -98,12 +109,15 @@ class AutomaticDiContainer implements ContainerInterface
         return $className;
     }
 
-    private function getPreferences():array
+    /**
+     * @return array<class-string, class-string>
+     */
+    private function getPreferences(): array
     {
         return $this->config->getPreferences();
     }
 
-    private function hasPreference(string $id):bool
+    private function hasPreference(string $id): bool
     {
         return isset($this->getPreferences()[$id]);
     }
