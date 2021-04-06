@@ -18,10 +18,6 @@ jobs:
     container:
       image: eventjet/checks-${{ matrix.php }}:latest
 
-    env:
-      PHPSTAN_CONFIG: ${{ matrix.phpstan_config }}
-      REQUIRE_CHECKER_CONFIG: ${{ matrix.require_checker_config }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -47,9 +43,9 @@ jobs:
 
       - name: Static analysis
         run: |
-          composer check-deps -- ${{ env.REQUIRE_CHECKER_CONFIG }}
+          composer check-deps -- ${{ matrix.require_checker_config }}
           composer cs-check
-          composer phpstan -- --no-progress ${{ env.PHPSTAN_CONFIG }}
+          composer phpstan -- --no-progress ${{ matrix.phpstan_config }}
 
       - name: Tests
         run: |
