@@ -61,5 +61,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           clover_file: "coverage.xml"
-          threshold_alert: 94
+          comment_context: PHP ${{ matrix.php }}
+          threshold_alert: 95
           threshold_warning: 100
