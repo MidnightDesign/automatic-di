@@ -7,12 +7,13 @@ jobs:
 
     strategy:
       matrix:
+        php: ["7.4", "8.0"]
+        composer_deps: ["", "--prefer-lowest"]
         include:
           - php: "7.4"
             phpstan_config: "-c phpstan-php7.neon"
             require_checker_config: "--config-file=composer-require-checker-php7.json"
             infection_score: "--min-msi=92 --min-covered-msi=96"
-          - php: "8.0"
 
     runs-on: ubuntu-latest
     container:
@@ -39,7 +40,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer install --no-progress --no-suggest --no-interaction > /dev/null
+          composer update --no-progress --no-suggest --no-interaction ${{ matrix.composer_deps }} > /dev/null
 
       - name: Static analysis
         run: |

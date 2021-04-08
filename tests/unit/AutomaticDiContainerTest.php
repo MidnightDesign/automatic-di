@@ -245,6 +245,58 @@ class AutomaticDiContainerTest extends TestCase
         self::assertSame(42, $object->bazInt);
     }
 
+    public function testNonOptionalUnionTypeParameterWithPreference(): void
+    {
+        if (PHP_VERSION_ID < 80000) {
+            self::markTestSkipped('This test only works in PHP 8.');
+        }
+        $this->configureContainer(
+            [
+                'classes' => [
+                    RequiresUnionType::class => [
+                        'fooBar' => Foo::class,
+                    ],
+                ],
+            ]
+        );
+        $this->configureExternalContainer(
+            [
+                Foo::class => new Foo(),
+            ]
+        );
+
+        $object = $this->container->get(RequiresUnionType::class);
+
+        self::assertInstanceOf(RequiresUnionType::class, $object);
+        self::assertInstanceOf(Foo::class, $object->fooBar);
+    }
+
+    public function testNonOptionalUnionTypeParameterWithOtherPreferenceOfUnion(): void
+    {
+        if (PHP_VERSION_ID < 80000) {
+            self::markTestSkipped('This test only works in PHP 8.');
+        }
+        $this->configureContainer(
+            [
+                'classes' => [
+                    RequiresUnionType::class => [
+                        'fooBar' => Bar::class,
+                    ],
+                ],
+            ]
+        );
+        $this->configureExternalContainer(
+            [
+                Bar::class => new Bar(new Foo()),
+            ]
+        );
+
+        $object = $this->container->get(RequiresUnionType::class);
+
+        self::assertInstanceOf(RequiresUnionType::class, $object);
+        self::assertInstanceOf(Bar::class, $object->fooBar);
+    }
+
     /**
      * @param array<string, mixed> $config
      */
