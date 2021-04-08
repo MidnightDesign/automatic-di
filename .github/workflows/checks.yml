@@ -8,7 +8,6 @@ jobs:
     strategy:
       matrix:
         php: ["7.4", "8.0"]
-        composer_deps: ["", "--prefer-lowest"]
         include:
           - php: "7.4"
             phpstan_config: "-c phpstan-php7.neon"
@@ -40,7 +39,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer update --no-progress --no-suggest --no-interaction ${{ matrix.composer_deps }} > /dev/null
+          composer update --no-progress --no-suggest --no-interaction > /dev/null
 
       - name: Static analysis
         run: |
