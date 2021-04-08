@@ -7,7 +7,9 @@ namespace Midnight\AutomaticDi;
 use LogicException;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
+use ReflectionNamedType;
 use ReflectionParameter;
+use ReflectionUnionType;
 
 use function class_exists;
 use function interface_exists;
@@ -85,8 +87,24 @@ class AutomaticDiContainer implements ContainerInterface
         if (isset($classPreferences[$class->getName()][$parameter->name])) {
             return $classPreferences[$class->getName()][$parameter->name];
         }
-        $class = $parameter->getClass();
-        if ($class === null) {
+        $type = $parameter->getType();
+        if ($type instanceof ReflectionUnionType) {
+            throw new LogicException(
+                sprintf(
+                    'Constructor parameter %s is a union type, which is not supported, yet.',
+                    $parameter->name,
+                )
+            );
+        }
+        if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
+            /** @var class-string $className */
+            $className = $type->getName();
+            $type = new ReflectionClass($className);
+        } else {
+            $type = null;
+        }
+
+        if ($type === null) {
             $declaringClass = $parameter->getDeclaringClass() !== null ? $parameter->getDeclaringClass()->name : '?';
             throw new LogicException(
                 sprintf(
@@ -96,7 +114,6 @@ class AutomaticDiContainer implements ContainerInterface
                 )
             );
         }
-        $className = $class->name;
         return $this->getPreference($className);
     }
 

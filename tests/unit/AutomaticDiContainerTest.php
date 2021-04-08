@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace MidnightTest\Unit\AutomaticDi;
 
+use LogicException;
 use Midnight\AutomaticDi\AutomaticDiConfig;
 use Midnight\AutomaticDi\AutomaticDiContainer;
 use MidnightTest\Unit\AutomaticDi\TestDouble\MemoryContainer;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+
+use const PHP_VERSION_ID;
 
 class AutomaticDiContainerTest extends TestCase
 {
@@ -218,6 +221,80 @@ class AutomaticDiContainerTest extends TestCase
         $requiresFoo = $this->container->get(RequiresFooAndOtherClass::class);
 
         self::assertInstanceOf(RequiresFooAndOtherClass::class, $requiresFoo);
+    }
+
+    public function testNonOptionalParameterWithUnionTypeThrowsException(): void
+    {
+        if (PHP_VERSION_ID < 80000) {
+            self::markTestSkipped('This test only works in PHP 8.');
+        }
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Constructor parameter fooBar is a union type, which is not supported, yet.');
+
+        $this->container->get(RequiresUnionType::class);
+    }
+
+    public function testWithUnionTypeParameterUsesDefaultValue(): void
+    {
+        if (PHP_VERSION_ID < 80000) {
+            self::markTestSkipped('This test only works in PHP 8.');
+        }
+        $object = $this->container->get(UnionTypeWithDefaultValue::class);
+
+        self::assertInstanceOf(UnionTypeWithDefaultValue::class, $object);
+        self::assertSame(42, $object->bazInt);
+    }
+
+    public function testNonOptionalUnionTypeParameterWithPreference(): void
+    {
+        if (PHP_VERSION_ID < 80000) {
+            self::markTestSkipped('This test only works in PHP 8.');
+        }
+        $this->configureContainer(
+            [
+                'classes' => [
+                    RequiresUnionType::class => [
+                        'fooBar' => Foo::class,
+                    ],
+                ],
+            ]
+        );
+        $this->configureExternalContainer(
+            [
+                Foo::class => new Foo(),
+            ]
+        );
+
+        $object = $this->container->get(RequiresUnionType::class);
+
+        self::assertInstanceOf(RequiresUnionType::class, $object);
+        self::assertInstanceOf(Foo::class, $object->fooBar);
+    }
+
+    public function testNonOptionalUnionTypeParameterWithOtherPreferenceOfUnion(): void
+    {
+        if (PHP_VERSION_ID < 80000) {
+            self::markTestSkipped('This test only works in PHP 8.');
+        }
+        $this->configureContainer(
+            [
+                'classes' => [
+                    RequiresUnionType::class => [
+                        'fooBar' => Bar::class,
+                    ],
+                ],
+            ]
+        );
+        $this->configureExternalContainer(
+            [
+                Bar::class => new Bar(new Foo()),
+            ]
+        );
+
+        $object = $this->container->get(RequiresUnionType::class);
+
+        self::assertInstanceOf(RequiresUnionType::class, $object);
+        self::assertInstanceOf(Bar::class, $object->fooBar);
     }
 
     /**
