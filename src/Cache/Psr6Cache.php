@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Midnight\AutomaticDi\Cache;
 
@@ -7,8 +9,7 @@ use Psr\Cache\CacheItemPoolInterface;
 
 class Psr6Cache implements CacheInterface
 {
-    /** @var CacheItemPoolInterface */
-    private $cache;
+    private CacheItemPoolInterface $cache;
 
     public function __construct(CacheItemPoolInterface $cache)
     {
@@ -29,7 +30,7 @@ class Psr6Cache implements CacheInterface
         return $item->get();
     }
 
-    public function set(string $key, string $value)
+    public function set(string $key, string $value): void
     {
         $item = $this->cache->getItem($key);
         $item->set($value);

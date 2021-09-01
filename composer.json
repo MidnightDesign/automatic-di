@@ -10,14 +10,14 @@
     },
     "require-dev": {
         "eventjet/coding-standard": "^3.6",
-        "infection/infection": "^0.21.4",
+        "infection/infection": "^0.24",
         "maglnet/composer-require-checker": "^3.2",
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan": "^0.12.83",
         "phpstan/phpstan-phpunit": "^0.12.16",
         "phpstan/phpstan-strict-rules": "^0.12.2",
         "phpunit/phpunit": "^9.5",
-        "symfony/cache": "^3.2"
+        "symfony/cache": "^5.3"
     },
     "config": {
         "sort-packages": true

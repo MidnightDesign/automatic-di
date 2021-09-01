@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace MidnightTest\Unit\AutomaticDi\Cache;
 
@@ -8,39 +10,38 @@ use PHPUnit\Framework\TestCase;
 
 class MemoryCacheTest extends TestCase
 {
-    /** @var MemoryCache */
-    private $cache;
+    private MemoryCache $cache;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
-        $this->cache = new MemoryCache;
+        $this->cache = new MemoryCache();
     }
 
-    public function testHasNot()
+    public function testHasNot(): void
     {
-        $this->assertFalse($this->cache->has('nope'));
+        self::assertFalse($this->cache->has('nope'));
     }
 
-    public function testHas()
+    public function testHas(): void
     {
         $this->cache->set('foo', 'bar');
 
-        $this->assertTrue($this->cache->has('foo'));
+        self::assertTrue($this->cache->has('foo'));
     }
 
-    public function testFailingGet()
+    public function testFailingGet(): void
     {
         $this->expectException(CacheMissException::class);
 
         $this->cache->get('nope');
     }
 
-    public function testSetAndGet()
+    public function testSetAndGet(): void
     {
         $this->cache->set('foo', 'bar');
 
-        $this->assertSame('bar', $this->cache->get('foo'));
+        self::assertSame('bar', $this->cache->get('foo'));
     }
 }

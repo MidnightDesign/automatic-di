@@ -1,13 +1,17 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Midnight\AutomaticDi\Cache;
 
 use Midnight\AutomaticDi\Cache\Exception\CacheMissException;
 
+use function array_key_exists;
+
 class MemoryCache implements CacheInterface
 {
-    /** @var string[] */
-    private $cache = [];
+    /** @var array<string, string> */
+    private array $cache = [];
 
     public function has(string $key): bool
     {
@@ -22,7 +26,7 @@ class MemoryCache implements CacheInterface
         return $this->cache[$key];
     }
 
-    public function set(string $key, string $value)
+    public function set(string $key, string $value): void
     {
         $this->cache[$key] = $value;
     }

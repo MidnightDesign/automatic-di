@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Midnight\AutomaticDi;
 
 use LogicException;
-use Psr\Container\ContainerInterface;
 use Midnight\AutomaticDi\Cache\CacheInterface;
 use Midnight\AutomaticDi\Cache\MemoryCache;
+use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionUnionType;
 
+use function assert;
 use function class_exists;
 use function interface_exists;
 use function sprintf;
@@ -21,14 +22,13 @@ class AutomaticDiContainer implements ContainerInterface
 {
     private ContainerInterface $container;
     private AutomaticDiConfig $config;
-    /** @var CacheInterface */
-    private $cache;
+    private CacheInterface $cache;
 
-    public function __construct(ContainerInterface $container, AutomaticDiConfig $config, CacheInterface $cache = null)
+    public function __construct(ContainerInterface $container, AutomaticDiConfig $config, ?CacheInterface $cache = null)
     {
         $this->container = $container;
         $this->config = $config;
-        $this->cache = $cache ?? new MemoryCache;
+        $this->cache = $cache ?? new MemoryCache();
     }
 
     /**
@@ -95,8 +95,11 @@ class AutomaticDiContainer implements ContainerInterface
         $classPreferences = $this->config->getClassPreferences();
         if (isset($classPreferences[$class->getName()][$parameter->name])) {
             $serviceName = $classPreferences[$class->getName()][$parameter->name];
-        } else {
-            $type = $parameter->getType();
+            $this->cache->set($cacheKey, $serviceName);
+            return $serviceName;
+        }
+
+        $type = $parameter->getType();
         if ($type instanceof ReflectionUnionType) {
             throw new LogicException(
                 sprintf(
@@ -105,7 +108,7 @@ class AutomaticDiContainer implements ContainerInterface
                 )
             );
         }
-            if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
+        if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
             /** @var class-string $className */
             $className = $type->getName();
             $type = new ReflectionClass($className);
@@ -114,15 +117,17 @@ class AutomaticDiContainer implements ContainerInterface
         }
 
         if ($type === null) {
-                $declaringClass = $parameter->getDeclaringClass() !== null ? $parameter->getDeclaringClass()->name : '?';throw new LogicException(sprintf(
+            $declaringClass = $parameter->getDeclaringClass() !== null ? $parameter->getDeclaringClass()->name : '?';
+            throw new LogicException(
+                sprintf(
                     'Missing preference for constructor parameter %s of %s.',
                     $parameter->name,
                     $declaringClass
                 )
             );
-            }
-            $serviceName = $this->getPreference($className);
         }
+        $serviceName = $this->getPreference($className);
+
         $this->cache->set($cacheKey, $serviceName);
         return $serviceName;
     }
@@ -151,6 +156,8 @@ class AutomaticDiContainer implements ContainerInterface
 
     private function createParameterCacheKey(ReflectionParameter $parameter): string
     {
-        return $parameter->getDeclaringClass()->getName() . '::' . $parameter->getName();
+        $reflectionClass = $parameter->getDeclaringClass();
+        assert($reflectionClass !== null);
+        return $reflectionClass->getName() . '::' . $parameter->getName();
     }
 }

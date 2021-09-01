@@ -1,8 +1,12 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace Midnight\AutomaticDi\Cache\Exception;
 
 use LogicException;
+
+use function sprintf;
 
 class CacheMissException extends LogicException
 {

@@ -21,14 +21,13 @@ class AutomaticDiContainerTest extends TestCase
     /** @var AutomaticDiConfig|MockObject */
     private $config;
     private AutomaticDiContainer $container;
-    /** @var CacheInterface */
-    private $cache;
+    private CacheInterface $cache;
 
     protected function setUp(): void
     {
         $this->externalContainer = new MemoryContainer();
         $this->config = $this->createMock(AutomaticDiConfig::class);
-        $this->cache = new MemoryCache;
+        $this->cache = new MemoryCache();
         $this->container = new AutomaticDiContainer($this->externalContainer, $this->config, $this->cache);
     }
 
@@ -302,21 +301,25 @@ class AutomaticDiContainerTest extends TestCase
         self::assertInstanceOf(Bar::class, $object->fooBar);
     }
 
-    public function testGetFromCache()
+    public function testGetFromCache(): void
     {
-        $this->configureContainer([
-                                      'preferences' => [
-                                          FooInterface::class => Foo::class,
-                                      ],
-                                  ]);
-        $this->configureExternalContainer([
-                                              Foo::class => new Foo,
-                                          ]);
+        $this->configureContainer(
+            [
+                'preferences' => [
+                    FooInterface::class => Foo::class,
+                ],
+            ]
+        );
+        $this->configureExternalContainer(
+            [
+                Foo::class => new Foo(),
+            ]
+        );
         $this->container->get(Baz::class);
 
         $bar = $this->container->get(Baz::class);
 
-        $this->assertInstanceOf(Baz::class, $bar);
+        self::assertInstanceOf(Baz::class, $bar);
     }
 
     /**
