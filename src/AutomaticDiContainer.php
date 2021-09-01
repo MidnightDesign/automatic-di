@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Midnight\AutomaticDi;
 
 use LogicException;
+use Midnight\AutomaticDi\Cache\CacheInterface;
+use Midnight\AutomaticDi\Cache\MemoryCache;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionUnionType;
 
+use function assert;
 use function class_exists;
 use function interface_exists;
 use function sprintf;
@@ -19,11 +22,13 @@ class AutomaticDiContainer implements ContainerInterface
 {
     private ContainerInterface $container;
     private AutomaticDiConfig $config;
+    private CacheInterface $cache;
 
-    public function __construct(ContainerInterface $container, AutomaticDiConfig $config)
+    public function __construct(ContainerInterface $container, AutomaticDiConfig $config, ?CacheInterface $cache = null)
     {
         $this->container = $container;
         $this->config = $config;
+        $this->cache = $cache ?? new MemoryCache();
     }
 
     /**
@@ -83,10 +88,17 @@ class AutomaticDiContainer implements ContainerInterface
 
     private function serviceName(ReflectionParameter $parameter, ReflectionClass $class): string
     {
+        $cacheKey = $this->createParameterCacheKey($parameter);
+        if ($this->cache->has($cacheKey)) {
+            return $this->cache->get($cacheKey);
+        }
         $classPreferences = $this->config->getClassPreferences();
         if (isset($classPreferences[$class->getName()][$parameter->name])) {
-            return $classPreferences[$class->getName()][$parameter->name];
+            $serviceName = $classPreferences[$class->getName()][$parameter->name];
+            $this->cache->set($cacheKey, $serviceName);
+            return $serviceName;
         }
+
         $type = $parameter->getType();
         if ($type instanceof ReflectionUnionType) {
             throw new LogicException(
@@ -114,7 +126,10 @@ class AutomaticDiContainer implements ContainerInterface
                 )
             );
         }
-        return $this->getPreference($className);
+        $serviceName = $this->getPreference($className);
+
+        $this->cache->set($cacheKey, $serviceName);
+        return $serviceName;
     }
 
     private function getPreference(string $className): string
@@ -137,5 +152,12 @@ class AutomaticDiContainer implements ContainerInterface
     private function hasPreference(string $id): bool
     {
         return isset($this->getPreferences()[$id]);
+    }
+
+    private function createParameterCacheKey(ReflectionParameter $parameter): string
+    {
+        $reflectionClass = $parameter->getDeclaringClass();
+        assert($reflectionClass !== null);
+        return $reflectionClass->getName() . '::' . $parameter->getName();
     }
 }

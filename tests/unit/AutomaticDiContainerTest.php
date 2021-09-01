@@ -7,6 +7,8 @@ namespace MidnightTest\Unit\AutomaticDi;
 use LogicException;
 use Midnight\AutomaticDi\AutomaticDiConfig;
 use Midnight\AutomaticDi\AutomaticDiContainer;
+use Midnight\AutomaticDi\Cache\CacheInterface;
+use Midnight\AutomaticDi\Cache\MemoryCache;
 use MidnightTest\Unit\AutomaticDi\TestDouble\MemoryContainer;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -19,12 +21,14 @@ class AutomaticDiContainerTest extends TestCase
     /** @var AutomaticDiConfig|MockObject */
     private $config;
     private AutomaticDiContainer $container;
+    private CacheInterface $cache;
 
     protected function setUp(): void
     {
         $this->externalContainer = new MemoryContainer();
         $this->config = $this->createMock(AutomaticDiConfig::class);
-        $this->container = new AutomaticDiContainer($this->externalContainer, $this->config);
+        $this->cache = new MemoryCache();
+        $this->container = new AutomaticDiContainer($this->externalContainer, $this->config, $this->cache);
     }
 
     public function testGetSimple(): void
@@ -295,6 +299,27 @@ class AutomaticDiContainerTest extends TestCase
 
         self::assertInstanceOf(RequiresUnionType::class, $object);
         self::assertInstanceOf(Bar::class, $object->fooBar);
+    }
+
+    public function testGetFromCache(): void
+    {
+        $this->configureContainer(
+            [
+                'preferences' => [
+                    FooInterface::class => Foo::class,
+                ],
+            ]
+        );
+        $this->configureExternalContainer(
+            [
+                Foo::class => new Foo(),
+            ]
+        );
+        $this->container->get(Baz::class);
+
+        $bar = $this->container->get(Baz::class);
+
+        self::assertInstanceOf(Baz::class, $bar);
     }
 
     /**
